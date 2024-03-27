@@ -40,5 +40,6 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<UserAccount> accounts;
 
-
+    @OneToMany(mappedBy = "user")
+    private List<UserRole> userRoles;
 }
