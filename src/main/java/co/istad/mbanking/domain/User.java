@@ -30,7 +30,7 @@ public class User {
     @Column(nullable = false)
     private Integer pin;  // Store 4-digit
 
-    @Column(nullable = false, length = 30)
+    @Column(unique = true, nullable = false, length = 30)
     private String phoneNumber;
 
     @Column(nullable = false)
