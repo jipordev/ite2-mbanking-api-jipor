@@ -1,8 +1,8 @@
 package co.istad.mbanking.features.user;
 
 
-import co.istad.mbanking.features.user.dto.UserCreateRequest;
-import co.istad.mbanking.features.user.dto.UserDetailResponse;
+import co.istad.mbanking.features.user.dto.PasswordEditRequest;
+import co.istad.mbanking.features.user.dto.UserRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,11 +18,25 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping
+    ResponseEntity findAllUsers(){
+        return ResponseEntity.accepted().body(
+                Map.of(
+                        "users", userService.findAllUser()
+                )
+        );
+    }
+
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    void createUser(@Valid @RequestBody UserCreateRequest request){
+    void createUser(@Valid @RequestBody UserRequest request){
         userService.createUser(request);
     }
 
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PatchMapping("/change-password/{oldPassword}")
+    void editPassword(@PathVariable String oldPassword, @RequestBody PasswordEditRequest request){
+        userService.editPassword(oldPassword, request);
+    }
 
 }

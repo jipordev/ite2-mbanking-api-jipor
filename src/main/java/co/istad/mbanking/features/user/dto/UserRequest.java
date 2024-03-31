@@ -4,7 +4,7 @@ import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
-public record UserCreateRequest(
+public record UserRequest(
         @NotNull
         @Max(9999)
         @Positive
@@ -14,6 +14,7 @@ public record UserCreateRequest(
         String phoneNumber,
         @NotBlank
         String password,
+        String newPassword,
         @NotBlank
         String confirmedPassword,
         @NotBlank

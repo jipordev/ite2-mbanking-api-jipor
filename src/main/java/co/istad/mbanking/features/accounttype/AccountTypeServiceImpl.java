@@ -40,6 +40,7 @@ public class AccountTypeServiceImpl implements AccountTypeService{
         }
         return accountTypeRepository.findAll()
                 .stream()
+                .filter(accountType -> accountType.getAlias().equals(alias))
                 .map(accountType -> new AccountTypeResponse(
                         accountType.getAlias(),
                         accountType.getName(),
