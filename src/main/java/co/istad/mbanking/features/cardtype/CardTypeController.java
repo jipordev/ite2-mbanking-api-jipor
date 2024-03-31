@@ -19,7 +19,7 @@ public class CardTypeController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-    ResponseEntity findAllCardType(){
+    ResponseEntity<?> findAllCardType(){
         return ResponseEntity.accepted().body(
                 Map.of(
                         "data", cardTypeService.findAllCardType()
@@ -28,7 +28,7 @@ public class CardTypeController {
     }
 
     @GetMapping("{name}")
-    ResponseEntity findCardTypeByName(@PathVariable String name) {
+    ResponseEntity<?> findCardTypeByName(@PathVariable String name) {
         return ResponseEntity.accepted().body(
                 Map.of(
                         "data", cardTypeService.findCardTypeByName(name)
