@@ -47,13 +47,13 @@ public class User {
     private LocalDate dob;
 
     @Column(length = 100)
-    private String cityOrProvince;
+    private String cityOrProvince; //u
 
     @Column(length = 100)
-    private String khanOrDistrict;
+    private String khanOrDistrict; //u
 
     @Column(length = 100)
-    private String sangkatOrCommune;
+    private String sangkatOrCommune; //u
 
     @Column(length = 100)
     private String village;
@@ -62,18 +62,18 @@ public class User {
     private String street;
 
     @Column(length = 100)
-    private String employeeType;
+    private String employeeType; //u
 
     @Column(length = 100)
-    private String position;
+    private String position; //u
 
     @Column(length = 100)
-    private String companyName;
+    private String companyName; //u
 
     @Column(length = 100)
-    private String mainSourceOfIncome;
+    private String mainSourceOfIncome; //u
 
-    private BigDecimal monthlyIncomeRange;
+    private BigDecimal monthlyIncomeRange; //u
 
     @Column(unique = true)
     private String oneSignalId;
