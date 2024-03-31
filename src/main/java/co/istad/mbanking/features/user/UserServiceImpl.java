@@ -4,6 +4,7 @@ package co.istad.mbanking.features.user;
 import co.istad.mbanking.domain.Role;
 import co.istad.mbanking.domain.User;
 import co.istad.mbanking.features.user.dto.PasswordEditRequest;
+import co.istad.mbanking.features.user.dto.UserEditRequest;
 import co.istad.mbanking.features.user.dto.UserRequest;
 import co.istad.mbanking.features.user.dto.UserDetailResponse;
 import co.istad.mbanking.mapper.UserMapper;
@@ -95,6 +96,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public List<UserDetailResponse> findAllUser() {
+
         return userRepository.findAll().stream()
                 .map(user -> new UserDetailResponse(
                         user.getUuid(),
@@ -105,5 +107,30 @@ public class UserServiceImpl implements UserService{
                         user.getGender(),
                         user.getDob()
                 )).toList();
+
+    }
+
+    @Override
+    public void editUserByUuid(String uuid, UserEditRequest request) {
+
+        if (!userRepository.existsByUuid(uuid)){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User has not been found"
+            );
+        }
+        User user = userRepository.findAll().stream()
+                .filter(user1 -> user1.getUuid().equals(uuid))
+                .findFirst().orElseThrow();
+        user.setCityOrProvince(request.cityOrProvince());
+        user.setKhanOrDistrict(request.khanOrDistrict());
+        user.setSangkatOrCommune(request.sangkatOrCommune());
+        user.setEmployeeType(request.employeeType());
+        user.setPosition(request.position());
+        user.setCompanyName(request.companyName());
+        user.setMainSourceOfIncome(request.mainSourceOfIncome());
+        user.setMonthlyIncomeRange(request.monthlyIncomeRange());
+        userRepository.save(user);
+
     }
 }

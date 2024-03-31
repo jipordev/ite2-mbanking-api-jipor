@@ -1,6 +1,7 @@
 package co.istad.mbanking.features.user;
 
 import co.istad.mbanking.features.user.dto.PasswordEditRequest;
+import co.istad.mbanking.features.user.dto.UserEditRequest;
 import co.istad.mbanking.features.user.dto.UserRequest;
 import co.istad.mbanking.features.user.dto.UserDetailResponse;
 
@@ -11,4 +12,5 @@ public interface UserService {
 
     void createUser(UserRequest userCreateRequest);
     void editPassword(String oldPassword, PasswordEditRequest request);
+    void editUserByUuid(String uuid, UserEditRequest request);
 }
