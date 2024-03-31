@@ -3,7 +3,9 @@ package co.istad.mbanking.features.user;
 
 import co.istad.mbanking.domain.Role;
 import co.istad.mbanking.domain.User;
-import co.istad.mbanking.features.user.dto.UserCreateRequest;
+import co.istad.mbanking.features.user.dto.PasswordEditRequest;
+import co.istad.mbanking.features.user.dto.UserRequest;
+import co.istad.mbanking.features.user.dto.UserDetailResponse;
 import co.istad.mbanking.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,7 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     @Override
-    public void createUser(UserCreateRequest userCreateRequest) {
+    public void createUser(UserRequest userCreateRequest) {
 
 
         if (userRepository.existsByPhoneNumber(userCreateRequest.phoneNumber())) {
@@ -51,7 +53,7 @@ public class UserServiceImpl implements UserService{
             );
         }
 
-        User user = userMapper.fromUserCreateResponse(userCreateRequest);
+        User user = userMapper.fromUserCreateRequest(userCreateRequest);
         user.setUuid(UUID.randomUUID().toString());
 
         user.setProfileImage("avatar.png");
@@ -66,10 +68,42 @@ public class UserServiceImpl implements UserService{
                                         HttpStatus.NOT_FOUND,
                                         "Role user has not been found"
                                 ));
-//        Role userRole = new Role();
-//        userRole.setName("USER");
         roles.add(userRole);
         user.setRoles(roles);
         userRepository.save(user);
+    }
+
+    @Override
+    public void editPassword(String oldPassword, PasswordEditRequest request) {
+
+        if (!oldPassword.equals(request.password())){
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Wrong password! Please try again"
+            );
+        }
+        if (!request.newPassword().equals(request.confirmedPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Password does not match!"
+            );
+        }
+        User user = userRepository.findAll().stream().findFirst().orElseThrow();
+        user.setPassword(request.newPassword());
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<UserDetailResponse> findAllUser() {
+        return userRepository.findAll().stream()
+                .map(user -> new UserDetailResponse(
+                        user.getUuid(),
+                        user.getNationalCardId(),
+                        user.getPhoneNumber(),
+                        user.getName(),
+                        user.getProfileImage(),
+                        user.getGender(),
+                        user.getDob()
+                )).toList();
     }
 }
