@@ -20,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    ResponseEntity findAllUsers(){
+    ResponseEntity<?> findAllUsers(){
         return ResponseEntity.accepted().body(
                 Map.of(
                         "users", userService.findAllUser()
@@ -44,4 +44,5 @@ public class UserController {
     void editUserByUuid(@PathVariable String  uuid,@RequestBody UserEditRequest request){
         userService.editUserByUuid(uuid,request);
     }
+
 }
