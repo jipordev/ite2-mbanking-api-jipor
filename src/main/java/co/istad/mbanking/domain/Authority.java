@@ -1,11 +1,9 @@
 package co.istad.mbanking.domain;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.List;
 
 @NoArgsConstructor
@@ -21,7 +19,7 @@ public class Authority {
     @Column(length = 15, nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "authority")
-    private List<RoleAuthority> roleAuthorities;
+    @ManyToMany(mappedBy = "authorities")
+    private List<Role> roles;
 
 }

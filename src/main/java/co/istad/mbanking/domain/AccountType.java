@@ -9,8 +9,8 @@ import org.w3c.dom.Text;
 import java.util.List;
 
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "account_types")
 public class AccountType {
@@ -20,9 +20,12 @@ public class AccountType {
     private Integer id;
 
     @Column(unique = true, nullable = false, length = 100)
+    private String alias;
+
+    @Column(unique = true, nullable = false, length = 100)
     private String name;
 
-    @Column(columnDefinition = "Text")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     private Boolean isDeleted;
@@ -31,3 +34,4 @@ public class AccountType {
     private List<Account> accounts;
 
 }
+

@@ -1,6 +1,5 @@
 package co.istad.mbanking.domain;
 
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +9,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
 @Entity
 @Table(name = "accounts")
 public class Account {
@@ -26,6 +25,13 @@ public class Account {
     @Column(unique = true, nullable = false, length = 100)
     private String actName;
 
+    @Column(length = 100)
+    private String alias;
+
+    @Column(nullable = false)
+    private BigDecimal balance;
+
+    @Column(nullable = false)
     private BigDecimal transferLimit;
 
     // Account has a type
@@ -38,4 +44,7 @@ public class Account {
     @OneToOne
     private Card card;
 
+    private Boolean isHidden; // uses to hide account on mobile app
+
 }
+

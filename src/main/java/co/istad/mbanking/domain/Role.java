@@ -15,14 +15,15 @@ import java.util.List;
 public class Role {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(length = 15, nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "role")
-    private List<RoleAuthority> roleAuthorities;
+    @ManyToMany
+    private List<Authority> authorities;
 
-    @OneToMany(mappedBy = "role")
-    private List<UserRole> userRoles;
+    @ManyToMany(mappedBy = "roles")
+    private List<User> users;
 }
