@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface AccountTypeRepository extends JpaRepository<AccountType, Integer> {
     Boolean existsByAlias(String alias);
 
+    Optional<AccountType> findByAlias(String alias);
+
 }

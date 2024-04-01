@@ -1,14 +1,17 @@
 package co.istad.mbanking.features.user;
 
 
+import co.istad.mbanking.base.BasedMessage;
 import co.istad.mbanking.domain.Role;
+import co.istad.mbanking.domain.Transaction;
 import co.istad.mbanking.domain.User;
-import co.istad.mbanking.features.user.dto.PasswordEditRequest;
-import co.istad.mbanking.features.user.dto.UserEditRequest;
-import co.istad.mbanking.features.user.dto.UserRequest;
-import co.istad.mbanking.features.user.dto.UserDetailResponse;
+import co.istad.mbanking.features.user.dto.*;
 import co.istad.mbanking.mapper.UserMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,13 +23,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
     @Override
-    public void createUser(UserRequest userCreateRequest) {
+    public void createUser(UserCreateRequest userCreateRequest) {
 
 
         if (userRepository.existsByPhoneNumber(userCreateRequest.phoneNumber())) {
@@ -41,7 +45,7 @@ public class UserServiceImpl implements UserService{
                     "National card is already existed"
             );
         }
-        if (userRepository.existsByStudentIdCard(userCreateRequest.studentId())) {
+        if (userRepository.existsByStudentIdCard(userCreateRequest.studentIdCard())) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Student card is already existed"
@@ -69,6 +73,17 @@ public class UserServiceImpl implements UserService{
                                         HttpStatus.NOT_FOUND,
                                         "Role user has not been found"
                                 ));
+
+        // Create dynamic role from client
+        userCreateRequest.roles().forEach(r -> {
+            Role newRole = roleRepository.findByName(r.name())
+                    .orElseThrow(() ->
+                            new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                    "Role USER has not been found!"));
+            roles.add(newRole);
+        });
+
+
         roles.add(userRole);
         user.setRoles(roles);
         userRepository.save(user);
@@ -95,23 +110,29 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public List<UserDetailResponse> findAllUser() {
-
-        return userRepository.findAll().stream()
-                .map(user -> new UserDetailResponse(
-                        user.getUuid(),
-                        user.getNationalCardId(),
-                        user.getPhoneNumber(),
-                        user.getName(),
-                        user.getProfileImage(),
-                        user.getGender(),
-                        user.getDob()
-                )).toList();
+    public Page<UserDetailsResponse> findAllUser(int page, int limit) {
+        // Create pageRequest object
+        PageRequest pageRequest = PageRequest.of(page, limit);
+        // Invoke findAll(pageRequest)
+        Page<User> users = userRepository.findAll(pageRequest);
+        // Map result
+        return users.map(userMapper::toUserDetailResponse);
 
     }
 
     @Override
-    public void editUserByUuid(String uuid, UserEditRequest request) {
+    public UserDetailsResponse findByUuid(String uuid) {
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "user has not been found"
+                )
+        );
+        return userMapper.toUserDetailResponse(user);
+    }
+
+    @Override
+    public void updateUserByUuid(String uuid, UserEditRequest request) {
 
         if (!userRepository.existsByUuid(uuid)){
             throw new ResponseStatusException(
@@ -132,5 +153,80 @@ public class UserServiceImpl implements UserService{
         user.setMonthlyIncomeRange(request.monthlyIncomeRange());
         userRepository.save(user);
 
+    }
+
+    @Override
+    public UserResponse updateUserByUuid(String uuid, UserUpdateRequest request) {
+
+        // check uuid if it's existed
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "user has not been found"
+                )
+        );
+
+        userMapper.fromUerUpdateRequest(request, user);
+
+        userRepository.save(user);
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public void deleteUserByUuid(String uuid) {
+
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "user has not been found"
+                )
+        );
+
+        userRepository.delete(user);
+
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage blockByUuid(String uuid) {
+
+        if (!userRepository.existsByUuid(uuid)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User has not been found"
+            );
+        }
+        userRepository.blockByUuid(uuid);
+
+        return new BasedMessage("User has been blocked");
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage enableByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User has not been found"
+            );
+        }
+        userRepository.enableByUuid(uuid);
+
+        return new BasedMessage("User has been enabled");
+    }
+
+    @Transactional
+    @Override
+    public BasedMessage disableByUuid(String uuid) {
+        if (!userRepository.existsByUuid(uuid)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User has not been found"
+            );
+        }
+        userRepository.disableByUuid(uuid);
+
+        return new BasedMessage("User has been disabled");
     }
 }

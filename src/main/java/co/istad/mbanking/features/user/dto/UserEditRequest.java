@@ -13,6 +13,5 @@ public record UserEditRequest(
         String mainSourceOfIncome,
         BigDecimal monthlyIncomeRange
 
-
 ) {
 }
