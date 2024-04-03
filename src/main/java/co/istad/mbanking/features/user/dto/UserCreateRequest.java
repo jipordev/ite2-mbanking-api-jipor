@@ -6,10 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record UserCreateRequest(
-        @NotNull
-        @Max(9999)
-        @Positive
-        Integer pin,
+        @Size(max = 6, min = 6, message = "Pin can only be 6 digit")
+        @Pattern(regexp = "\\d+", message = "Pin can only be 6 digit")
+        String pin,
 
         @NotBlank
         @Size(max = 20)

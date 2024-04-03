@@ -1,6 +1,8 @@
 package co.istad.mbanking.features.cardtype;
 
+import co.istad.mbanking.domain.CardType;
 import co.istad.mbanking.features.cardtype.dto.CardTypeResponse;
+import co.istad.mbanking.mapper.CardTypeMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -13,14 +15,15 @@ import java.util.List;
 public class CardTypeServiceImpl implements CardTypeService {
 
     private final CardTypeRepository cardRepository;
+    private final CardTypeMapper cardTypeMapper;
 
     @Override
     public List<CardTypeResponse> findAllCardType() {
-        return cardRepository.findAll().stream()
-                .map(cardType -> new CardTypeResponse(
-                        cardType.getName(),
-                        cardType.getIsDeleted()
-                )).toList();
+
+        List<CardType> cardTypes = cardRepository.findAll();
+
+        return cardTypeMapper.toCardTypeResponseList(cardTypes);
+
     }
 
     @Override
@@ -33,13 +36,15 @@ public class CardTypeServiceImpl implements CardTypeService {
             );
         }
 
-        return cardRepository.findAll().stream()
-                .filter(cardType -> cardType.getName().equals(name))
-                .map(cardType -> new CardTypeResponse(
-                        cardType.getName(),
-                        cardType.getIsDeleted()
-                ))
-                .findFirst().orElseThrow();
+        CardType cardType = cardRepository.findByName(name)
+                .orElseThrow(
+                        () -> new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Card type has not been found"
+                        )
+                );
+
+        return cardTypeMapper.toCardTypeResponse(cardType);
 
     }
 }
