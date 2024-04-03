@@ -2,14 +2,17 @@ package co.istad.mbanking.features.media;
 
 import co.istad.mbanking.features.media.dto.MediaResponse;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Negative;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,6 +46,15 @@ public class MediaController {
     @GetMapping
     List<MediaResponse> loadAllMedias() {
         return mediaService.loadAllMedias("IMAGE");
+    }
+
+    @GetMapping("/download/{mediaName}")
+    public ResponseEntity<?> downloadMedia(@PathVariable String mediaName) {
+        return ResponseEntity.ok().body(
+                Map.of(
+                        "media",mediaService.downloadMediaByName(mediaName, "IMAGE")
+                )
+        );
     }
 
 }

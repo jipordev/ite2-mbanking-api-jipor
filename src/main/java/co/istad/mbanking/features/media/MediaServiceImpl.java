@@ -2,12 +2,16 @@ package co.istad.mbanking.features.media;
 
 import co.istad.mbanking.features.media.dto.MediaResponse;
 import co.istad.mbanking.util.MediaUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -174,9 +178,26 @@ public class MediaServiceImpl implements  MediaService{
         }
     }
 
-    @Override
-    public MediaResponse downloadMediaByName(String mediaName) {
-        return null;
+    public ResponseEntity<Resource> downloadMediaByName(String fileName, String folderName) {
+        try {
+            Path path = Paths.get(serverPath+folderName+"\\"+fileName);
+            Resource resource = new UrlResource(path.toUri());
+
+            if (!resource.exists()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media file not found");
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", fileName);
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading media file", e);
+        }
     }
+
+
 
 }
