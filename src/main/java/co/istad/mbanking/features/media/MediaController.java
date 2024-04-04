@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Negative;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,13 +49,10 @@ public class MediaController {
         return mediaService.loadAllMedias("IMAGE");
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/download/{mediaName}")
-    public ResponseEntity<?> downloadMedia(@PathVariable String mediaName) {
-        return ResponseEntity.ok().body(
-                Map.of(
-                        "media",mediaService.downloadMediaByName(mediaName, "IMAGE")
-                )
-        );
+    public ResponseEntity<Resource> downloadMedia(@PathVariable String mediaName) {
+        return mediaService.downloadMediaByName(mediaName, "IMAGE");
     }
 
 }

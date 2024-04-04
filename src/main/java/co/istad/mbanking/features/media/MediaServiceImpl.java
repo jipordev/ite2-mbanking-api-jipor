@@ -180,24 +180,23 @@ public class MediaServiceImpl implements  MediaService{
 
     public ResponseEntity<Resource> downloadMediaByName(String fileName, String folderName) {
         try {
-            Path path = Paths.get(serverPath+folderName+"\\"+fileName);
+            Path path = Paths.get(serverPath, folderName, fileName);
             Resource resource = new UrlResource(path.toUri());
 
             if (!resource.exists()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media file not found");
             }
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", fileName);
+
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(resource);
-
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading media file", e);
         }
     }
-
-
 
 }
