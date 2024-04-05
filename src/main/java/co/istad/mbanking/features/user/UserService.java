@@ -18,4 +18,6 @@ public interface UserService {
     BasedMessage blockByUuid(String uuid);
     BasedMessage enableByUuid(String uuid);
     BasedMessage disableByUuid(String uuid);
+    String updateProfileImage(String uuid, String mediaName);
+
 }

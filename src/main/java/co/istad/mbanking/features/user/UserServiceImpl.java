@@ -10,6 +10,7 @@ import co.istad.mbanking.mapper.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,11 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final RoleRepository roleRepository;
+
+    @Value("${MEDIA_BASE_URI}")
+    private String mediaBaseUri;
+
+
     @Override
     public void createUser(UserCreateRequest userCreateRequest) {
 
@@ -228,5 +234,27 @@ public class UserServiceImpl implements UserService{
         userRepository.disableByUuid(uuid);
 
         return new BasedMessage("User has been disabled");
+    }
+
+    @Override
+    public String updateProfileImage(String uuid, String mediaName) {
+
+        if (!userRepository.existsByUuid(uuid)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "User has not been found!"
+            );
+        }
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "User has not been found!"
+                    )
+        );
+        user.setProfileImage(mediaName);
+        userRepository.save(user);
+
+        return mediaBaseUri + "IMAGE/" + mediaName;
     }
 }

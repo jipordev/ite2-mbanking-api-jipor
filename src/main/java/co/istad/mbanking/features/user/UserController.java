@@ -2,9 +2,11 @@ package co.istad.mbanking.features.user;
 
 
 import co.istad.mbanking.base.BasedMessage;
+import co.istad.mbanking.base.BasedResponse;
 import co.istad.mbanking.features.user.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -79,6 +81,19 @@ public class UserController {
     @PutMapping("/{uuid}/disable")
     BasedMessage disableByUuid(@PathVariable String uuid){
         return userService.disableByUuid(uuid);
+    }
+
+
+    // Update user profile image
+    @PutMapping("/{uuid}/profile-image")
+    BasedResponse<?> updateProfileImage(@PathVariable String uuid,
+                                            @Valid @RequestBody UserProfileImageRequest request) {
+        String newProfileImageUri = userService.updateProfileImage(uuid, request.mediaName());
+
+        return BasedResponse.builder()
+                .payload(newProfileImageUri)
+                .build();
+
     }
 
 }

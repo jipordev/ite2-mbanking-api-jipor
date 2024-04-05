@@ -17,6 +17,7 @@ public interface MediaService {
     MediaResponse deleteMediaByName(String mediaName, String folderName);
 
     List<MediaResponse> loadAllMedias(String folderName);
-    ResponseEntity<Resource> downloadMediaByName(String mediaName, String folderName);
+//    ResponseEntity<Resource> downloadMediaByName(String mediaName, String folderName);
+    Resource downloadMediaByName(String mediaName, String folderName);
 
 }

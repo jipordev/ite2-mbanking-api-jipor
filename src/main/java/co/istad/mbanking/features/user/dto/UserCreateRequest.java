@@ -6,18 +6,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record UserCreateRequest(
-        @Size(max = 6, min = 6, message = "Pin can only be 6 digit")
-        @Pattern(regexp = "\\d+", message = "Pin can only be 6 digit")
+        @NotNull
+        @Size(max = 9999, message = "Pin must be 4 digits")
+        @Positive(message = "Pin must be positive")
         String pin,
 
-        @NotBlank
-        @Size(max = 20)
+        @NotBlank(message = "Phone number is required")
+        @Size(max = 20, message = "Phone number must be less than 20 digits")
         String phoneNumber,
 
-        @NotBlank
+        @NotBlank(message = "Password is required")
         String password,
 
-        @NotBlank
+        @NotBlank(message = "Confirm password is required")
         String confirmedPassword,
 
         @NotBlank

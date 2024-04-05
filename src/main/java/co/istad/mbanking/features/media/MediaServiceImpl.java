@@ -47,7 +47,8 @@ public class MediaServiceImpl implements  MediaService{
         // Extract extension from file upload
         // Assume profile.png
 
-         newName += "."+ MediaUtil.extractExtension(file.getName());
+         newName += "."+ MediaUtil.extractExtension(file.getOriginalFilename());
+         log.info("new name: {}",newName);
 
         Path path = Paths.get(serverPath + folderName + "\\" + newName);
         try {
@@ -178,25 +179,25 @@ public class MediaServiceImpl implements  MediaService{
         }
     }
 
-    public ResponseEntity<Resource> downloadMediaByName(String fileName, String folderName) {
+    @Override
+    public Resource downloadMediaByName(String mediaName, String folderName) {
+
+        Path path = Paths.get(serverPath , folderName , mediaName);
         try {
-            Path path = Paths.get(serverPath, folderName, fileName);
             Resource resource = new UrlResource(path.toUri());
-
             if (!resource.exists()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Media file not found");
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Media has not been found!"
+                );
             }
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment", fileName);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(resource);
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error downloading media file", e);
+        } catch (MalformedURLException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Media has not been found"
+            );
         }
-    }
 
+        return null;
+    }
 }
