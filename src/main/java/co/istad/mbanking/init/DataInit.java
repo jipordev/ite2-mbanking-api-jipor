@@ -90,7 +90,6 @@ public class DataInit {
             cardTypeRepository.save(masterCard);
             cardTypeRepository.save(visaCard);
         }
-
     }
 
 }

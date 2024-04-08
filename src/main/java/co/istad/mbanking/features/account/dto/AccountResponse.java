@@ -1,5 +1,7 @@
 package co.istad.mbanking.features.account.dto;
 
+import co.istad.mbanking.domain.User;
+import co.istad.mbanking.features.accounttype.dto.AccountTypeResponse;
 import co.istad.mbanking.features.user.dto.UserResponse;
 import lombok.Setter;
 
@@ -11,7 +13,7 @@ public record AccountResponse(
         String alias,
         BigDecimal balance,
         BigDecimal transferLimit,
-        String accountTypeName,
-        UserResponse userResponse
+        AccountTypeResponse accountType,
+        UserResponse user
 ) {
 }
