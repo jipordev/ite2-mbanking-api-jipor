@@ -3,6 +3,7 @@ package co.istad.mbanking.mapper;
 import co.istad.mbanking.domain.Account;
 import co.istad.mbanking.features.account.dto.AccountCreateRequest;
 import co.istad.mbanking.features.account.dto.AccountResponse;
+import co.istad.mbanking.features.account.dto.AccountSnippetResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -21,5 +22,7 @@ public interface AccountMapper {
     List<AccountResponse> toAccountResponseList(List<Account> accounts);
 
     Account fromAccountCreateRequest(AccountCreateRequest request);
+
+    AccountSnippetResponse toAccountSnippetResponse(Account account);
 
 }
