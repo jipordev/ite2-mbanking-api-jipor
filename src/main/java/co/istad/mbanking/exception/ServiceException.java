@@ -13,7 +13,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class ServiceException {
     @ExceptionHandler(ResponseStatusException.class)
-    ResponseEntity<?> handleServiceError(ResponseStatusException ex) {
+    ResponseEntity<?> handleServiceErrors(ResponseStatusException ex) {
 
         BasedError<String> basedError = new BasedError<>();
         basedError.setCode(ex.getStatusCode().toString());
@@ -24,6 +24,7 @@ public class ServiceException {
 
         return ResponseEntity.status(ex.getStatusCode())
                 .body(basedErrorResponse);
+
     }
 
 }

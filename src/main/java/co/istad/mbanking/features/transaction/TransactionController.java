@@ -4,7 +4,6 @@ import co.istad.mbanking.features.transaction.dto.TransactionCreateRequest;
 import co.istad.mbanking.features.transaction.dto.TransactionResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +39,7 @@ public class TransactionController {
 
         // Call service method with sorting and filtering parameters
         return service.findAll(page, size, sortObject, transactionType);
+
     }
 
 }

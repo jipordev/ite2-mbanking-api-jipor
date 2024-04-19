@@ -95,11 +95,15 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<TransactionResponse> findAll(int page, int size, Sort sort, String transactionType) {
         if (page < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Page number must be greater or equal to 0");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Page number must be greater or equal to 0");
         }
 
         if (size < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Size must be greater or equal to one");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Size must be greater or equal to one");
         }
 
         // Construct the predicate for filtering based on transactionType

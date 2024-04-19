@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     void createAccount(@RequestBody AccountCreateRequest request){
         accountService.createNew(request);
