@@ -51,16 +51,17 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
-        httpSecurity
-                .authorizeHttpRequests(request -> request
+        httpSecurity.authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/api/v1/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/users/**").hasAnyRole("ADMIN", "STAFF", "CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT,"/api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
+//                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("SCOPE_user:read")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
+//                .requestMatchers("/api/v1/users/**").permitAll()
                         .anyRequest()
-                        .authenticated());
+                        .authenticated()
+        );
 
         // security mechanism
 //        httpSecurity.httpBasic(Customizer.withDefaults());
@@ -96,7 +97,6 @@ public class SecurityConfig {
 
     @Bean
     JWKSource<SecurityContext> jwkSource(RSAKey rsaKey){
-
         JWKSet jwkSet = new JWKSet(rsaKey);
         return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
