@@ -1,5 +1,6 @@
 package co.istad.mbanking.security;
 
+import co.istad.mbanking.util.KeyUtil;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
@@ -9,8 +10,10 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -23,6 +26,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.security.KeyPair;
@@ -39,6 +43,13 @@ public class SecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final KeyUtil keyUtil;
+
+    @Bean
+    JwtAuthenticationProvider jwtAuthenticationProvider(@Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder){
+        JwtAuthenticationProvider provider = new JwtAuthenticationProvider(refreshJwtDecoder);
+        return provider;
+    }
 
     @Bean
     DaoAuthenticationProvider daoAuthenticationConfigurer(){
@@ -54,7 +65,6 @@ public class SecurityConfig {
         httpSecurity.authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
-//                .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("SCOPE_user:read")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
@@ -77,71 +87,56 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
+    @Primary
     @Bean
-    public KeyPair keyPair(){
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(512);
-            return keyPairGenerator.generateKeyPair();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Bean
-    public RSAKey rsaKey(KeyPair keyPair){
-        return new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())
-                .privateKey(keyPair.getPrivate())
+    JWKSource<SecurityContext> jwkSource() {
+        RSAKey rsaKey = new RSAKey.Builder(keyUtil.getAccessTokenPublicKey())
+                .privateKey(keyUtil.getAccessTokenPrivateKey())
                 .keyID(UUID.randomUUID().toString())
                 .build();
-    }
-
-    @Bean
-    JWKSource<SecurityContext> jwkSource(RSAKey rsaKey){
         JWKSet jwkSet = new JWKSet(rsaKey);
-        return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
+        return (jwkSelector, securityContext) -> jwkSelector
+                .select(jwkSet);
     }
 
+    @Primary
     @Bean
     JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
         return new NimbusJwtEncoder(jwkSource);
     }
 
+    @Primary
     @Bean
-    JwtDecoder jwtDecoder(RSAKey rsaKey) throws JOSEException {
+    JwtDecoder jwtDecoder() throws JOSEException {
         return NimbusJwtDecoder
-                .withPublicKey(rsaKey.toRSAPublicKey())
+                .withPublicKey(keyUtil.getAccessTokenPublicKey())
                 .build();
     }
 
-    //    @Bean
-//    InMemoryUserDetailsManager inMemoryUserDetailsManager(){
-//
-//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-//
-//        UserDetails userAdmin = User.builder()
-//                .username("admin")
-//                .password(passwordEncoder.encode("admin"))
-//                .roles("USER", "ADMIN")
-//                .build();
-//
-//        UserDetails userCustomer = User.builder()
-//                .username("customer")
-//                .password(passwordEncoder.encode("customer"))
-//                .roles("USER", "CUSTOMER")
-//                .build();
-//
-//        UserDetails userStaff = User.builder()
-//                .username("staff")
-//                .password(passwordEncoder.encode("staff"))
-//                .roles("USER", "STAFF")
-//                .build();
-//
-//        manager.createUser(userAdmin);
-//        manager.createUser(userCustomer);
-//        manager.createUser(userStaff);
-//
-//        return manager;
-//    }
+    // JWT REFRESH TOKEN =====================================
+
+    @Bean("refreshJwkSource")
+    JWKSource<SecurityContext> refreshJwkSource() {
+        RSAKey rsaKey = new RSAKey.Builder(keyUtil.getRefreshTokenPublicKey())
+                .privateKey(keyUtil.getRefreshTokenPrivateKey())
+                .keyID(UUID.randomUUID().toString())
+                .build();
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return (jwkSelector, securityContext) -> jwkSelector
+                .select(jwkSet);
+    }
+
+    @Bean("refreshJwtEncoder")
+    JwtEncoder refreshJwtEncoder(@Qualifier("refreshJwkSource") JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean("refreshJwtDecoder")
+    JwtDecoder refreshJwtDecoder() throws JOSEException {
+        return NimbusJwtDecoder
+                .withPublicKey(keyUtil.getRefreshTokenPublicKey())
+                .build();
+    }
+
 
 }

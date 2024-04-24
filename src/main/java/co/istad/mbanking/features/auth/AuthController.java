@@ -1,8 +1,8 @@
-package co.istad.mbanking.auth;
+package co.istad.mbanking.features.auth;
 
 
-import co.istad.mbanking.auth.dto.AuthResponse;
-import co.istad.mbanking.auth.dto.LoginRequest;
+import co.istad.mbanking.features.auth.dto.AuthResponse;
+import co.istad.mbanking.features.auth.dto.LoginRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

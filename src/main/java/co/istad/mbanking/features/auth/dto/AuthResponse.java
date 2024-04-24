@@ -1,4 +1,4 @@
-package co.istad.mbanking.auth.dto;
+package co.istad.mbanking.features.auth.dto;
 
 public record AuthResponse(
         String type,
