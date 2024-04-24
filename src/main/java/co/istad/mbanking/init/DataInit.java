@@ -1,10 +1,10 @@
 package co.istad.mbanking.init;
 
 import co.istad.mbanking.domain.AccountType;
-import co.istad.mbanking.domain.CardType;
+import co.istad.mbanking.domain.Authority;
 import co.istad.mbanking.domain.Role;
 import co.istad.mbanking.features.accounttype.AccountTypeRepository;
-import co.istad.mbanking.features.cardtype.CardTypeRepository;
+import co.istad.mbanking.features.user.AuthorityRepository;
 import co.istad.mbanking.features.user.RoleRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,25 +17,58 @@ import java.util.List;
 public class DataInit {
 
     private final RoleRepository roleRepository;
+    private final AuthorityRepository authorityRepository;
     private final AccountTypeRepository accountTypeRepository;
-    private final CardTypeRepository cardTypeRepository;
 
     @PostConstruct
     void initRole() {
 
         // Auto generate role (USER, CUSTOMER, STAFF, ADMIN)
         if (roleRepository.count() < 1) {
+
+            Authority userRead = new Authority();
+            userRead.setName("user:read");
+            Authority userWrite = new Authority();
+            userWrite.setName("user:write");
+            Authority transactionRead = new Authority();
+            transactionRead.setName("transaction:read");
+            Authority transactionWrite = new Authority();
+            transactionWrite.setName("transaction:write");
+            Authority accountRead = new Authority();
+            accountRead.setName("account:read");
+            Authority accountWrite = new Authority();
+            accountWrite.setName("account:write");
+            Authority accountTypeRead = new Authority();
+            accountTypeRead.setName("accountType:read");
+            Authority accountTypeWrite = new Authority();
+            accountTypeWrite.setName("accountType:write");
+
             Role user = new Role();
             user.setName("USER");
+            user.setAuthorities(List.of(
+                    userRead, transactionRead,
+                    accountRead, accountTypeRead
+            ));
 
             Role customer = new Role();
             customer.setName("CUSTOMER");
+            customer.setAuthorities(List.of(
+                    userWrite, transactionWrite,
+                    accountWrite
+            ));
 
             Role staff = new Role();
             staff.setName("STAFF");
+            staff.setAuthorities(List.of(
+                    accountTypeWrite
+            ));
 
             Role admin = new Role();
             admin.setName("ADMIN");
+            admin.setAuthorities(List.of(
+                    userWrite, accountWrite,
+                    accountTypeWrite
+            ));
 
             roleRepository.saveAll(
                     List.of(user, customer, staff, admin)
@@ -45,52 +78,29 @@ public class DataInit {
     }
 
     @PostConstruct
-    void initAccountType(){
+    void initAccountType() {
         if (accountTypeRepository.count() < 1) {
-            AccountType savingAccountType = new AccountType();
-            savingAccountType.setName("Saving Account");
-            savingAccountType.setAlias("saving-account");
-            savingAccountType.setIsDeleted(false);
-            savingAccountType.setDescription("A saving account is a deposit...");
-//            accountTypeRepository.save(savingAccountType);
+            AccountType savingActType = new AccountType();
+            savingActType.setName("Saving Account");
+            savingActType.setAlias("saving-account");
+            savingActType.setIsDeleted(false);
+            savingActType.setDescription("A savings account is a deposit account held at a financial institution that provides security for your principal and a modest interest rate.");
+            accountTypeRepository.save(savingActType);
 
-            AccountType payrollAccountType = new AccountType();
-            payrollAccountType.setName("Payroll Account");
-            payrollAccountType.setAlias("payroll-account");
-            payrollAccountType.setIsDeleted(false);
-            payrollAccountType.setDescription("A payroll account is a type of account...");
-//            accountTypeRepository.save(payrollAccountType);
+            AccountType payrollActType = new AccountType();
+            payrollActType.setName("Payroll Account");
+            payrollActType.setAlias("payroll-account");
+            payrollActType.setIsDeleted(false);
+            payrollActType.setDescription("A payroll account is a type of account used specifically for employee compensation, whether it's to do with salary, wage, or bonuses.");
+            accountTypeRepository.save(payrollActType);
 
-            AccountType cardAccountType = new AccountType();
-            cardAccountType.setName("Card Account");
-            cardAccountType.setAlias("card-account");
-            cardAccountType.setIsDeleted(false);
-            cardAccountType.setDescription("A payroll account is a type of account...");
-//            accountTypeRepository.save(cardAccountType);
-
-            accountTypeRepository.saveAll(
-                    List.of(savingAccountType, payrollAccountType,
-                            cardAccountType)
-            );
-
-        }
-    }
-
-    @PostConstruct
-    void initCardType(){
-        if (cardTypeRepository.count() < 1){
-            CardType masterCard = new CardType();
-            masterCard.setName("Master Card");
-            masterCard.setIsDeleted(false);
-
-            CardType visaCard = new CardType();
-            visaCard.setName("Visa Card");
-            visaCard.setIsDeleted(false);
-
-            cardTypeRepository.save(masterCard);
-            cardTypeRepository.save(visaCard);
+            AccountType cardActType = new AccountType();
+            cardActType.setName("Card Account");
+            cardActType.setAlias("card-account");
+            cardActType.setIsDeleted(false);
+            cardActType.setDescription("Card Account means the Cardholder's Account(s) with the Bank in respect of which the Card is issued, on which withdrawals/payments shall be debited and lodgements credited when effected by the Cardholder.");
+            accountTypeRepository.save(cardActType);
         }
     }
 
 }
-

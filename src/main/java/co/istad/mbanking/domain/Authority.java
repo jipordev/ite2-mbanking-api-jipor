@@ -14,9 +14,10 @@ import java.util.List;
 public class Authority {
 
     @Id
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-    @Column(length = 15, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String name;
 
     @ManyToMany(mappedBy = "authorities")

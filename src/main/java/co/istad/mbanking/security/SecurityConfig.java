@@ -81,6 +81,7 @@ public class SecurityConfig {
     public KeyPair keyPair(){
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(512);
             return keyPairGenerator.generateKeyPair();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
