@@ -45,14 +45,15 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final KeyUtil keyUtil;
 
+
     @Bean
-    JwtAuthenticationProvider jwtAuthenticationProvider(@Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder){
+    JwtAuthenticationProvider jwtAuthenticationProvider(@Qualifier("refreshJwtDecoder") JwtDecoder refreshJwtDecoder) {
         JwtAuthenticationProvider provider = new JwtAuthenticationProvider(refreshJwtDecoder);
         return provider;
     }
 
     @Bean
-    DaoAuthenticationProvider daoAuthenticationConfigurer(){
+    DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
@@ -62,25 +63,31 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request
+
+        // TODO: your security logic
+        httpSecurity
+                .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAnyAuthority("SCOPE_ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_ROLE_ADMIN")
-//                .requestMatchers("/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasAuthority("SCOPE_user:write")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasAuthority("SCOPE_user:read")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/accounts/**").hasAuthority("SCOPE_account:write")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/accounts/**").hasAuthority("SCOPE_account:read")
                         .anyRequest()
                         .authenticated()
-        );
+                );
 
         // security mechanism
-//        httpSecurity.httpBasic(Customizer.withDefaults());
+        //httpSecurity.httpBasic(Customizer.withDefaults());
         httpSecurity.oauth2ResourceServer(jwt -> jwt
                 .jwt(Customizer.withDefaults()));
 
-
         // Disable CSRF
         httpSecurity.csrf(token -> token.disable());
+        // Change to STATELESS
         httpSecurity.sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
@@ -137,6 +144,5 @@ public class SecurityConfig {
                 .withPublicKey(keyUtil.getRefreshTokenPublicKey())
                 .build();
     }
-
 
 }

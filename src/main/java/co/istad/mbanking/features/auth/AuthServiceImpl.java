@@ -41,6 +41,8 @@ public class AuthServiceImpl implements AuthService{
                 loginRequest.password()
         );
 
+        auth = daoAuthenticationProvider.authenticate(auth);
+
         return tokenService.createToken(auth);
 
     }

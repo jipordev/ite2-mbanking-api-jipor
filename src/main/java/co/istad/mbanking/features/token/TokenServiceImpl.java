@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
@@ -18,9 +19,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class TokenServiceImpl implements TokenService{
+@RequiredArgsConstructor
+public class TokenServiceImpl implements TokenService {
+
     private final JwtEncoder jwtEncoder;
 
     private JwtEncoder refreshJwtEncoder;
@@ -45,11 +47,17 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public String createAccessToken(Authentication auth) {
 
-        String scope = auth.getAuthorities()
-                .stream()
-                .map(GrantedAuthority::getAuthority)
-                .filter(authority -> !authority.startsWith("ROLE_"))
-                .collect(Collectors.joining(" "));
+        String scope = "";
+
+        if (auth.getPrincipal() instanceof Jwt jwt) {
+            scope = jwt.getClaimAsString("scope");
+        } else {
+            scope = auth.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(authority -> !authority.startsWith("ROLE_"))
+                    .collect(Collectors.joining(" "));
+        }
 
         log.info("Scope: {}", scope);
 
@@ -71,6 +79,18 @@ public class TokenServiceImpl implements TokenService{
     @Override
     public String createRefreshToken(Authentication auth) {
 
+        String scope = "";
+
+        if (auth.getPrincipal() instanceof Jwt jwt) {
+            scope = jwt.getClaimAsString("scope");
+        } else {
+            scope = auth.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(authority -> !authority.startsWith("ROLE_"))
+                    .collect(Collectors.joining(" "));
+        }
+
         Instant now = Instant.now();
 
         JwtClaimsSet refreshJwtClaimsSet = JwtClaimsSet.builder()
@@ -80,9 +100,10 @@ public class TokenServiceImpl implements TokenService{
                 .issuedAt(now)
                 .expiresAt(now.plus(1, ChronoUnit.DAYS))
                 .issuer(auth.getName())
+                .claim("scope", scope)
                 .build();
 
         return refreshJwtEncoder.encode(JwtEncoderParameters.from(refreshJwtClaimsSet)).getTokenValue();
     }
-
 }
+
